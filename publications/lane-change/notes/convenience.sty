@@ -1,0 +1,84 @@
+% standard sets:
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\B}{\ensuremath{\mathbb{B}}}
+\newcommand{\posR}{\ensuremath{\R_+}}
+
+% \newcommand{\interiorSingle}{\ensuremath{\mathfrak{I}}}
+% \newcommand{\interior}[1]{\ensuremath{\interiorSingle(#1)}}
+
+% % sets for EMLSL and Traffic Diagrams
+% \newcommand{\intervals}{\ensuremath{\mathcal{I}}}
+
+% \newcommand{\formulas}{\ensuremath{\Phi}}
+% \newcommand{\diagrams}{\ensuremath{\mathfrak{D}}}
+% \newcommand{\graphs}{\ensuremath{\mathbb{G}}}
+
+% \newcommand{\expands}{\ensuremath{\to}}
+% \newcommand{\ggmid}[1]{\draw[-]  let \p{east} = (#1.east),
+%              \p{west} = (#1.west) in
+%          let \n{width} = {\x{east}-\x{west}} in ($(#1.north)+(\n{width}/2+5,0)$) -- ($(#1.south) + (\n{width}/2+5,0)$);
+% }
+
+
+% %makro fuer case distinction:
+% \renewcommand{\case}[1]{\textbf{Case #1:}}
+
+%%%
+% Tikz Drawing Macros
+%%%
+\tikzset{%
+ idea/.style={draw,text centered,cloud callout,callout absolute pointer={#1},gray!128,fill=gray!10,cloud ignores aspect=true,callout pointer shorten=2mm,callout pointer segments=3,cloud puffs=15},
+ idea/.default={(0,0)},
+%
+ maneuver/.style={%
+  >=stealth',auto,node distance=1.5cm,%
+%
+  state/.style={draw,ellipse,fill=white,inner sep=1pt,minimum size=5mm},
+  embedded/.style={draw,rectangle,fill=white,inner sep=2pt,minimum size=5mm},
+  initial/.style={draw,circle,fill=black,inner sep=1mm,minimum size=0mm},
+  final/.style={draw,circle,double distance=1pt,fill=black,outer sep=1pt,inner sep=1mm,minimum size=0mm},
+  agent/.style={draw,fill=white,signal,signal to=north,signal to=east,minimum width=15mm, minimum height=8mm},
+  agent reversed/.style={agent,signal to=north,signal to=west},
+  safety/.style={|-|,shorten >=1mm,shorten <=1mm},
+  channel/.style={->,thick,decorate,decoration={snake,post length=1.5mm}},
+  segm border/.style={thick},
+  lane border/.style={dash pattern=on 20pt off 30pt,very thick,gray!80},
+  elephant/.style={draw,fill=black,rectangle,minimum width=15mm, minimum height=10mm}
+}}
+
+
+\tikzset{%
+  semantics/.style={draw=green!40!black, opacity =1, rectangle, fill=green!80!black,very thick, minimum height=10mm}, 
+whole/.style={opacity=.5, draw=green!40!black, rounded corners, fill=green!80!black,very thick, minimum height=10mm},
+  logic/.style={draw=blue!80, rounded corners, fill=blue!40,very thick, minimum height=10mm},
+  mix/.style={draw=violet!80, rounded rectangle, fill=violet!40,very thick, minimum height=10mm}
+}
+
+
+\newcommand{\createlanes}[2][1.5]{
+
+ \coordinate (lane width) at (0,#1);
+ \coordinate (begin segm) at (0,0);
+ \coordinate (end segm) at (\linewidth-.5em,0);
+ \coordinate (mid segm) at ($ (begin segm)!.5!(end segm) $);
+ 
+ \draw[lane border] (begin segm) -- (end segm);
+ \foreach \lane in {1, ..., #2} {
+  \coordinate (begin lane \lane) at ($ (begin segm) + \lane*(lane width) - .5*(lane width) $);
+  \coordinate (mid lane \lane) at ($ (mid segm) + \lane*(lane width) - .5*(lane width) $);
+  \coordinate (end lane \lane) at ($ (end segm) + \lane*(lane width) - .5*(lane width) $);
+  \draw[lane border] ($ (begin segm) + \lane*(lane width) $) -- ($ (end segm) + \lane*(lane width) $);
+
+  \coordinate (left lane \lane) at ($ (begin lane \lane) + .5*(lane width) $);
+  \coordinate (right lane \lane) at ($ (begin lane \lane) - .5*(lane width) $);
+ }
+}
+
+
+% % abbreviations
+% \newcommand{\HR}{\(\text{HR}^\ast\) }
+
+% \newcommand{\defeq}{\ensuremath{\stackrel{df}{\Leftrightarrow}}}
+% \newcommand{\defined}{::=}
+\newcommand{\sltodo}[1]{\todo{#1}}

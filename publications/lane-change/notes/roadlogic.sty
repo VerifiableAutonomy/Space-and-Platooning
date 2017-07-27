@@ -1,0 +1,214 @@
+
+% \NewEnviron{angmatrix}{%
+%   \tikz[baseline=0pt]
+%     \draw[line width=1pt] 
+%      node[append after command={
+%       (\tikzlastnode.north west) -- ($(\tikzlastnode.west)+.2*(\tikzlastnode.west)!1!90:(\tikzlastnode.north west)$) -- (\tikzlastnode.south west)
+%       (\tikzlastnode.north east) -- ($(\tikzlastnode.east)+.2*(\tikzlastnode.east)!1!270:(\tikzlastnode.north east)$) -- (\tikzlastnode.south east)
+%       }] {\(\begin{matrix} \BODY \end{matrix}\)};}%
+% {}
+
+
+%\newcommand{\todo}[1]{\color{red}\emph{TODO: #1}\color{black}}
+\newcommand{\upptoken}[1]{{\small\tt #1}}
+\renewcommand{\iff}{{\ensuremath{\mathit{iff}}}}
+
+\newcommand{\mw}{motorway}  % BE
+\newcommand{\Mw}{Motorway}  % BE
+% \newcommand{\mw}{highway}   % AE
+% \newcommand{\Mw}{Highway}  % BE
+
+\newcommand{\car}{car}
+% \newcommand{\car}{vehicle}  
+
+
+\newcommand{\eqtext}[1]{\ensuremath{\{\text{#1}\}}}
+\newcommand{\metaequiv}{\ensuremath{\Leftrightarrow}}
+\renewcommand{\implies}{\ensuremath{\rightarrow}}
+\newcommand{\equivalent}{\ensuremath{\leftrightarrow}}
+
+\newcommand{\donotshow}[1]{}
+
+
+\newcommand{\laneReservation}{\ensuremath{res}}
+\newcommand{\laneClaim}{\ensuremath{clm}}
+
+\newcommand{\PowersetSingle}{\ensuremath{\mathcal{P}}}
+\newcommand{\Powerset}[1]{\ensuremath{\PowersetSingle(#1)}}
+\newcommand{\Space}{\ensuremath{\mathbb{S}}}
+\newcommand{\Lanes}{\ensuremath{\mathbb{L}}}
+\newcommand{\ViewLanes}{\ensuremath{L}}
+\newcommand{\Extension}{\ensuremath{X}}
+\newcommand{\ID}{\ensuremath{\mathbb{I}}}
+\newcommand{\Time}{\ensuremath{\mathbb{T}}}
+\newcommand{\Views}{\ensuremath{\mathbb{V}}}
+\newcommand{\Road}{\ensuremath{ts}}
+\newcommand{\Roads}{\ensuremath{\mathbb{TS}}}
+
+\newcommand{\TSText}{Traffic snapshot}
+\newcommand{\tsText}{traffic snapshot}
+
+\newcommand{\Car}{\ensuremath{\mathcal{C}}}
+%%% \newcommand{\val}{\ensuremath{\mathcal{N}}}  % ERO: probeweise \nu s.u.
+\newcommand{\val}{\ensuremath{\nu}}
+
+\newcommand{\sview}[2]{\ensuremath{V_s(#1, #2)}}
+
+
+\newcommand{\intervalvariables}{\ensuremath{\mathrm{IVar}}}
+
+\newcommand{\carvariables}{\ensuremath{\mathrm{CVar}}}
+\newcommand{\realvariables}{\ensuremath{\mathrm{RVar}}}
+\newcommand{\lanevariables}{\ensuremath{\mathrm{LVar}}}
+\newcommand{\variables}{\ensuremath{\mathrm{Var}}}
+\newcommand{\formulae}{\ensuremath{\Phi}}
+\newcommand{\claimed}[1]{\ensuremath{\mathit{cl}(#1)}}
+
+\newcommand{\actions}{\ensuremath{\mathcal{A}}}
+
+%syntax 
+
+\renewcommand{\frown}{\stackrel{
+                        \smallfrown}{\mbox{}}}
+
+
+\newcommand{\ego}{\ensuremath{\mathrm{ego}}}
+\newcommand{\carterm}{\ensuremath{\gamma}}
+\newcommand{\functerm}{\ensuremath{\theta}}
+\newcommand{\reserved}[1]{\ensuremath{\mathit{re}(#1)}}
+\newcommand{\carterms}{\ensuremath{\Gamma}}
+\newcommand{\functerms}{\ensuremath{\Theta}}
+\newcommand{\somewhere}[1]{\ensuremath{\left\langle #1 \right\rangle}}
+\newcommand{\free}{\ensuremath{\mathit{free}}}
+\newcommand{\eww}{\ensuremath{\omega}}
+\newcommand{\width}{\ensuremath{\eww}}
+\newcommand{\length}{\ensuremath{\ell}}
+
+\newcommand{\varsForm}[1]{\ensuremath{\variables(#1)}}
+
+\newcommand{\len}{\ensuremath{\mathit{len}}}
+\newcommand{\pos}{\ensuremath{\mathit{pos}}}
+\newcommand{\spd}{\ensuremath{\mathit{spd}}}
+\newcommand{\acc}{\mathit{acc}}
+\newcommand{\dyn}{\ensuremath{\mathit{dyn}}}
+\newcommand{\sd}{\ensuremath{\mathit{bd}}}
+\newcommand{\ps}{\ensuremath{\mathit{ps}}}
+
+%\newcommand{\transition}[1]{{\ensuremath{\;\xrightarrow{#1}\;}}}%\stackrel{#1}{\longrightarrow}}}}
+\newcommand{\transition}[1]{{\ensuremath{\boldsymbol{-}#1\!\boldsymbol{\rightarrow}}}}%\stackrel{#1}{\longrightarrow}}}}
+
+\newcommand{\abstrans}{\ensuremath{\boldsymbol{\Rightarrow}}}
+
+\newcounter{sarrow}
+\newcommand\xrsquigarrow[1]{%
+\stepcounter{sarrow}%
+\mathrel{\begin{tikzpicture}[baseline= {( $ (current bounding box.south) + (0,-0.5ex) $ )}]
+\node[inner sep=.5ex] (\thesarrow) {$\scriptstyle #1$};
+\path[draw,<-,decorate,
+  decoration={zigzag,amplitude=0.7pt,segment length=1.2mm,pre=lineto,pre length=4pt}] 
+    (\thesarrow.south east) -- (\thesarrow.south west);
+\end{tikzpicture}}%
+}
+
+
+\newcommand{\evolve}{\ensuremath{\boldsymbol{\leadsto}}}
+
+
+\newcommand{\dotcup}{{\ensuremath{\mathaccent\cdot\cup}}}
+
+%\renewcommand{\implies}{\ensuremath{\Rightarrow}}
+
+
+%\newcommand{\idEnter}[2]{{\ensuremath{enter(#1,#2)}}}%\odot #1,#2}}}
+%\newcommand{\idLeave}[1]{{\ensuremath{leave(#1)}}}%\otimes #1}}}
+
+\newcommand{\tclaim}[2]{{\ensuremath{c(#1,#2)}}}%\Yleft #1, #2}}}
+\newcommand{\twdclaim}[1]{{\ensuremath{wdc(#1)}}}%\not\Yleft #1}}}
+\newcommand{\treserve}[1]{{\ensuremath{r(#1)}}}%\boxempty #1}}}
+\newcommand{\twdreserve}[2]{{\ensuremath{wdr(#1,#2)}}}%\not\boxempty #1,#2}}}
+\newcommand{\tdyn}[2]{\ensuremath{dyn(#1,#2)}}
+
+%\newcommand{\updateExtension}[1]{\ensuremath{update(#1)}}%\talloblong #1}}
+
+%\newcommand{\updateAcc}[1]{\ensuremath{\overleftrightarrow{#1}}}
+
+\newcommand{\lndclaim}[1]{{\ensuremath{\mathsf{c}(#1)}}}%\Yleft #1, #2}}}
+\newcommand{\lndwdclaim}[1]{{\ensuremath{\mathsf{wd\ c}(#1)}}}%\not\Yleft #1}}}
+\newcommand{\lndres}[1]{{\ensuremath{\mathsf{r}(#1)}}}%\boxempty #1}}}
+\newcommand{\lndwdres}[1]{{\ensuremath{\mathsf{wd\ r}(#1)}}}%\not\boxempty #1,#2}}}
+\newcommand{\lndacc}[1]{\ensuremath{\mathsf{acc}(#1)}}
+
+\newcommand{\moveSingle}{\ensuremath{\mathit{mv}}}
+%
+%#1 source TS
+%#2 target TS
+%#3 view to be moved
+\newcommand{\move}[3]{\ensuremath{\moveSingle_{#1}^{#2}(#3)}}
+
+\newcommand{\switchSingle}{\ensuremath{\mathit{sw}}}
+\newcommand{\switch}[2]{\ensuremath{\switchSingle(#1 ,#2)}}
+
+\newcommand{\chop}{{\ensuremath{\,\operatorname{\smallfrown}\,}}}
+
+
+%\newcommand{\vchop}[2]{\ensuremath{
+%    \begin{array}{c}
+%      #1 \\ #2
+%    \end{array}
+%}}
+\newcommand{\vchop}{\ensuremath{\smallsmile}}
+\newcommand{\at}[1]{\ensuremath{\text{\MVAt}_{#1}}}
+\newcommand{\parenthesis}[1]{\ensuremath{\left( #1 \right)}}
+
+%\newcommand{\R}{\ensuremath{\mathbb{R}}}
+%\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+%\newcommand{\N}{\ensuremath{\mathbb{N}}}
+\newcommand{\true}{\ensuremath{\top}}
+\newcommand{\false}{\ensuremath{\bot}}
+
+%Substitution
+\newcommand{\subst}[2]{\ensuremath{\oplus \{#1 \mapsto #2\}}}
+
+\newcommand{\RoadDef}{\ensuremath{\Road=(\laneReservation, \laneClaim, \pos, \spd, \acc)}}
+
+%\newcommand{\oracle}[1]{\ensuremath{\Omega_E(#1)}}
+\newcommand{\sensors}[1]{\ensuremath{\Omega_{#1}}}
+\newcommand{\sensorsFunc}[3]{\ensuremath{\sensors{#1}(#2,#3)}}
+
+\newcommand{\config}{\ensuremath{\mathcal{C}}}
+
+%%%%%
+% Commands for the communication  of cars
+%%%%%
+\newcommand{\send}[2]{\ensuremath{#1!#2}}
+\newcommand{\receive}[2]{\ensuremath{#1?#2}}
+
+\newcommand{\request}{\ensuremath{\mathit{req}}}
+\newcommand{\yes}{\ensuremath{\mathit{yes}}}
+\newcommand{\no}{\ensuremath{\mathit{no}}}
+\newcommand{\lcend}{\ensuremath{\mathit{lc\_end}}}
+
+
+\newcommand{\TODO}[1]{{\begin{framed}\begin{center}\textbf{TODO:} #1\end{center}\end{framed}}}
+%\newcommand{\TODO}[1]{}
+
+%commands for potential helper and collision checks and lane-change manouevre chacks
+
+\newcommand{\pcc}[1]{\ensuremath{\mathit{pc}(#1)}}
+\newcommand{\phc}[1]{\ensuremath{\mathit{ph}(#1)}}
+\newcommand{\iphc}[1]{\ensuremath{\mathit{ph}^{-1}(#1)}}
+\newcommand{\lcc}{\ensuremath{\mathit{lc}}}
+
+% commands for safety envelope and size of cars
+
+\newcommand{\safetyenv}[1]{\ensuremath{\mathit{se}(#1)}}
+\newcommand{\size}[1]{\ensuremath{\mathit{size}(#1)}}
+
+
+
+%
+% for decidability:
+%
+
+\newcommand{\reachable}[1]{\ensuremath{\mathrm{Reach}(#1)}}
+
