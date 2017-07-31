@@ -1026,6 +1026,18 @@ system v2, s2, a2, v3, s3, a3, v4, s4, a4, l, c;
   </system>
 	<queries>
 		<query>
+			<formula>E&lt;&gt; s2.r ==1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>(s2.c ==1 &amp;&amp; !(pc)) --&gt; (s2.r ==1)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
 			<formula>A[] a2.leave_completed imply (a2.process_time&gt;=30 &amp;&amp; a2.process_time&lt;50)
 			</formula>
 			<comment>
