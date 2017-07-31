@@ -545,7 +545,7 @@ clock change_lane_clk;</declaration>
 			<source ref="id35"/>
 			<target ref="id34"/>
 			<label kind="synchronisation" x="-493" y="-110">changing_lane_join[id][id]?</label>
-			<label kind="assignment" x="-501" y="-93">c = 1, change_lane_clk = 0</label>
+			<label kind="assignment" x="-501" y="-93">c = 1, change_lane_clk = 0, cnt =0</label>
 		</transition>
 	</template>
 	<template>
