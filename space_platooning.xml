@@ -42,12 +42,19 @@ chan join_agr_c[1][V], leave_agr_c[1][V], platoon_m_c[1][V], set_spacing_c[1][V]
 chan changed_lane[V][V], changed_failed[V][V], set_spacing_vehicle_c[V][V], set_spacing_from_vehicle[V][V];
 chan speed_auto[V][V], close_enough[V][V], speed_manual[V][V], steering_auto[V][V], steering_manual[V][V]; 
 
+
 // space for platooning
+const int POT_C =  5;
+
 chan changing_lane_join[V][V], changing_lane_leave[V][V], change_lane_abort[V][V], phy_changing_lane[V][V], phy_changed_lane[V][V], insuff_space[V][V];
+chan check_collision[V][1];
 const int CH_L_W_DL = 25;
+
 
 bool pc = false;
 bool c[5] = {false, false, false, false,false};
+bool pc_back[5] = {false, false, false, false, false};
+
 
 broadcast chan start;
 
@@ -461,31 +468,6 @@ process_time = 0</label>
 		</transition>
 	</template>
 	<template>
-		<name>zenoness</name>
-		<declaration>
-int x = 0;</declaration>
-		<location id="id30" x="-119" y="-34">
-			<name x="-129" y="-68">B</name>
-			<committed/>
-		</location>
-		<location id="id31" x="-289" y="-17">
-			<name x="-299" y="-51">A</name>
-			<label kind="invariant" x="-340" y="8">x&lt;= 100</label>
-		</location>
-		<init ref="id31"/>
-		<transition>
-			<source ref="id30"/>
-			<target ref="id31"/>
-			<nail x="-178" y="25"/>
-		</transition>
-		<transition>
-			<source ref="id31"/>
-			<target ref="id30"/>
-			<label kind="guard" x="-238" y="-59">x == 10</label>
-			<label kind="assignment" x="-255" y="-42">x = 0</label>
-		</transition>
-	</template>
-	<template>
 		<name>ch_lane</name>
 		<parameter>ID id</parameter>
 		<declaration>
@@ -497,38 +479,62 @@ bool r = false;
 
 clock change_lane_clk;
 </declaration>
-		<location id="id32" x="-297" y="-314">
+		<location id="id30" x="-595" y="34">
+			<committed/>
+		</location>
+		<location id="id31" x="-297" y="-314">
 			<label kind="invariant" x="-527" y="-306">change_lane_clk &lt;= CH_L_W_DL</label>
 		</location>
-		<location id="id33" x="93" y="-34">
+		<location id="id32" x="93" y="-34">
 		</location>
-		<location id="id34" x="-263" y="110">
+		<location id="id33" x="-263" y="110">
 			<committed/>
 		</location>
-		<location id="id35" x="-144" y="-34">
+		<location id="id34" x="-144" y="-34">
 			<committed/>
 		</location>
-		<location id="id36" x="-297" y="-187">
-			<urgent/>
+		<location id="id35" x="-297" y="-187">
+			<committed/>
 		</location>
-		<location id="id37" x="-340" y="-34">
+		<location id="id36" x="-340" y="-34">
 		</location>
-		<init ref="id37"/>
+		<init ref="id36"/>
 		<transition>
-			<source ref="id34"/>
-			<target ref="id34"/>
+			<source ref="id30"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-578" y="229">check_collision[id][0]!</label>
+			<label kind="assignment" x="-535" y="263">c[id] = 1</label>
+			<nail x="-595" y="170"/>
+			<nail x="-595" y="255"/>
+			<nail x="-263" y="255"/>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-535" y="-119">changing_lane_join[id][id]?</label>
+			<label kind="assignment" x="-578" y="-102">c[id] = 1, change_lane_clk = 0, cnt = 0</label>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id30"/>
+			<label kind="synchronisation" x="-561" y="-51">changing_lane_leave[id][id]?</label>
+			<nail x="-595" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id33"/>
 			<label kind="guard" x="-374" y="136">pc</label>
 			<nail x="-357" y="110"/>
 			<nail x="-340" y="187"/>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id35"/>
+			<source ref="id32"/>
+			<target ref="id34"/>
 			<label kind="synchronisation" x="-119" y="-59">phy_changed_lane[id][id]?</label>
 		</transition>
 		<transition>
-			<source ref="id36"/>
-			<target ref="id37"/>
+			<source ref="id35"/>
+			<target ref="id36"/>
 			<label kind="guard" x="-229" y="-170">pc &amp;&amp; change_lane_clk &gt;= CH_L_W_DL - 10
 &amp;&amp; change_lane_clk &lt;= CH_L_W_DL</label>
 			<label kind="synchronisation" x="-221" y="-127">change_lane_abort[id][id]!</label>
@@ -536,91 +542,85 @@ clock change_lane_clk;
 			<nail x="-221" y="-119"/>
 		</transition>
 		<transition>
-			<source ref="id32"/>
-			<target ref="id36"/>
+			<source ref="id31"/>
+			<target ref="id35"/>
 			<label kind="synchronisation" x="-280" y="-340">changing_lane_join[id][id]?</label>
 			<label kind="assignment" x="-279" y="-314">c[id] = 1</label>
 			<nail x="-102" y="-314"/>
 			<nail x="-102" y="-221"/>
 		</transition>
 		<transition>
-			<source ref="id36"/>
-			<target ref="id32"/>
+			<source ref="id35"/>
+			<target ref="id31"/>
 			<label kind="guard" x="-289" y="-280">c[id] &amp;&amp; pc &amp;&amp; cnt &lt; 1</label>
 			<label kind="synchronisation" x="-289" y="-263">insuff_space[id][id]!</label>
 			<label kind="assignment" x="-289" y="-246">c[id] = 0, cnt++</label>
 		</transition>
 		<transition>
-			<source ref="id34"/>
-			<target ref="id33"/>
+			<source ref="id33"/>
+			<target ref="id32"/>
 			<label kind="guard" x="-85" y="68">!pc &amp;&amp; c[id]</label>
 			<label kind="synchronisation" x="-136" y="119">phy_changing_lane[id][id]!</label>
 			<label kind="assignment" x="-76" y="85">c[id] = 0, r = 1</label>
 			<nail x="93" y="110"/>
 		</transition>
 		<transition>
-			<source ref="id36"/>
-			<target ref="id33"/>
+			<source ref="id35"/>
+			<target ref="id32"/>
 			<label kind="guard" x="102" y="-170">!pc &amp;&amp; c[id]</label>
 			<label kind="synchronisation" x="102" y="-119">phy_changing_lane[id][id]!</label>
 			<label kind="assignment" x="102" y="-144">c[id] = 0, r = 1</label>
 			<nail x="93" y="-187"/>
 		</transition>
 		<transition>
-			<source ref="id35"/>
-			<target ref="id37"/>
+			<source ref="id34"/>
+			<target ref="id36"/>
 			<label kind="synchronisation" x="-306" y="-59">changed_lane[id][id]!</label>
 			<label kind="assignment" x="-238" y="-34">r = 0</label>
 		</transition>
 		<transition>
-			<source ref="id37"/>
-			<target ref="id34"/>
+			<source ref="id36"/>
+			<target ref="id33"/>
 			<label kind="synchronisation" x="-501" y="25">changing_lane_leave[id][id]?</label>
-			<label kind="assignment" x="-348" y="42">c[id] = 1</label>
-		</transition>
-		<transition>
-			<source ref="id37"/>
-			<target ref="id36"/>
-			<label kind="synchronisation" x="-493" y="-110">changing_lane_join[id][id]?</label>
-			<label kind="assignment" x="-501" y="-93">c[id] = 1, change_lane_clk = 0, cnt =0</label>
+			<label kind="assignment" x="-365" y="42">c[id] = 1</label>
 		</transition>
 	</template>
 	<template>
 		<name>potential_c</name>
 		<declaration>bool collision_flag;</declaration>
-		<location id="id38" x="-416" y="-110">
+		<location id="id37" x="-127" y="-42">
+			<label kind="invariant" x="-119" y="-25">c[2] || c[3] || c[4]</label>
 		</location>
-		<location id="id39" x="-450" y="-42">
+		<location id="id38" x="-510" y="-127">
+		</location>
+		<location id="id39" x="-510" y="-42">
 			<committed/>
 		</location>
-		<location id="id40" x="-213" y="-43">
-			<label kind="invariant" x="-195" y="-51">c[2] || c[3] || c[4]</label>
-		</location>
-		<location id="id41" x="-331" y="-42">
+		<location id="id40" x="-331" y="-42">
 		</location>
 		<init ref="id39"/>
 		<transition>
-			<source ref="id39"/>
-			<target ref="id38"/>
-			<label kind="assignment" x="-518" y="-85">collision_flag = 0, pc = 0</label>
-		</transition>
-		<transition>
-			<source ref="id39"/>
-			<target ref="id41"/>
-			<label kind="assignment" x="-476" y="-25">collision_flag = 1</label>
+			<source ref="id37"/>
+			<target ref="id40"/>
+			<label kind="assignment" x="-313" y="42">pc = 0</label>
+			<nail x="-127" y="42"/>
+			<nail x="-331" y="42"/>
 		</transition>
 		<transition>
 			<source ref="id40"/>
-			<target ref="id41"/>
-			<label kind="assignment" x="-313" y="34">pc = 0</label>
-			<nail x="-212" y="34"/>
-			<nail x="-331" y="34"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-314" y="-68">c[2] || c[3] || c[4]</label>
+			<label kind="assignment" x="-313" y="-42">pc = 1</label>
 		</transition>
 		<transition>
-			<source ref="id41"/>
+			<source ref="id39"/>
+			<target ref="id38"/>
+			<label kind="assignment" x="-688" y="-93">collision_flag = 0, pc = 0</label>
+		</transition>
+		<transition>
+			<source ref="id39"/>
 			<target ref="id40"/>
-			<label kind="guard" x="-313" y="-76">c[2] || c[3] || c[4]</label>
-			<label kind="assignment" x="-313" y="-42">pc = 1</label>
+			<label kind="assignment" x="-484" y="-34">collision_flag = 1</label>
 		</transition>
 	</template>
 	<template>
@@ -629,86 +629,86 @@ clock change_lane_clk;
 		<declaration>
 clock timer;
 </declaration>
-		<location id="id42" x="-348" y="-314">
+		<location id="id41" x="-348" y="-314">
 			<committed/>
 		</location>
-		<location id="id43" x="-850" y="-263">
+		<location id="id42" x="-850" y="-263">
 			<label kind="invariant" x="-1224" y="-255">timer&lt;= SET_SPACE_TIME+ SET_SPACE_BOUND</label>
 		</location>
-		<location id="id44" x="-850" y="-144">
+		<location id="id43" x="-850" y="-144">
 			<label kind="invariant" x="-1249" y="-136">timer&lt;= JOIN_DISTANCE_TIME+ JOIN_DISTANCE_BOUND</label>
 		</location>
-		<location id="id45" x="-195" y="-144">
+		<location id="id44" x="-195" y="-144">
 			<label kind="invariant" x="-187" y="-136">timer&lt;= CHANGE_LANE_TIME+ CHANGE_LANE_BOUND</label>
 		</location>
-		<location id="id46" x="-510" y="-144">
+		<location id="id45" x="-510" y="-144">
 		</location>
-		<init ref="id46"/>
+		<init ref="id45"/>
 		<transition>
-			<source ref="id46"/>
-			<target ref="id42"/>
+			<source ref="id45"/>
+			<target ref="id41"/>
 			<label kind="synchronisation" x="-467" y="-433">steering_auto[id][id]?</label>
 			<nail x="-467" y="-416"/>
 			<nail x="-331" y="-416"/>
 		</transition>
 		<transition>
-			<source ref="id46"/>
-			<target ref="id42"/>
+			<source ref="id45"/>
+			<target ref="id41"/>
 			<label kind="synchronisation" x="-467" y="-399">speed_manual[id][id]?</label>
 			<nail x="-467" y="-374"/>
 			<nail x="-348" y="-374"/>
 		</transition>
 		<transition>
-			<source ref="id42"/>
-			<target ref="id46"/>
+			<source ref="id41"/>
+			<target ref="id45"/>
 			<nail x="-348" y="-263"/>
 		</transition>
 		<transition>
-			<source ref="id46"/>
-			<target ref="id42"/>
+			<source ref="id45"/>
+			<target ref="id41"/>
 			<label kind="synchronisation" x="-467" y="-348">steering_manual[id][id]?</label>
 			<nail x="-459" y="-314"/>
 		</transition>
 		<transition>
-			<source ref="id43"/>
-			<target ref="id46"/>
+			<source ref="id42"/>
+			<target ref="id45"/>
 			<label kind="guard" x="-832" y="-297">timer&gt;= SET_SPACE_TIME - SET_SPACE_BOUND</label>
 			<label kind="synchronisation" x="-832" y="-280">set_spacing_from_vehicle[id][id]!</label>
 			<nail x="-493" y="-263"/>
 		</transition>
 		<transition>
-			<source ref="id46"/>
-			<target ref="id43"/>
+			<source ref="id45"/>
+			<target ref="id42"/>
 			<label kind="synchronisation" x="-832" y="-204">set_spacing_vehicle_c[id][id]?</label>
 			<label kind="assignment" x="-832" y="-187">timer=0</label>
 			<nail x="-510" y="-187"/>
 			<nail x="-850" y="-187"/>
 		</transition>
 		<transition>
-			<source ref="id44"/>
-			<target ref="id46"/>
+			<source ref="id43"/>
+			<target ref="id45"/>
 			<label kind="guard" x="-926" y="-93">timer&gt;= JOIN_DISTANCE_TIME - JOIN_DISTANCE_BOUND</label>
 			<label kind="synchronisation" x="-799" y="-68">close_enough[id][id]!</label>
 			<nail x="-850" y="-68"/>
 			<nail x="-527" y="-68"/>
 		</transition>
 		<transition>
-			<source ref="id46"/>
-			<target ref="id44"/>
+			<source ref="id45"/>
+			<target ref="id43"/>
 			<label kind="synchronisation" x="-832" y="-161">speed_auto[id][id]?</label>
 			<label kind="assignment" x="-832" y="-144">timer=0</label>
 		</transition>
 		<transition>
-			<source ref="id45"/>
-			<target ref="id46"/>
+			<source ref="id44"/>
+			<target ref="id45"/>
 			<label kind="guard" x="-493" y="-93">timer&gt;= CHANGE_LANE_TIME - CHANGE_LANE_BOUND</label>
 			<label kind="synchronisation" x="-450" y="-68">phy_changed_lane[id][id]!</label>
 			<nail x="-195" y="-68"/>
 			<nail x="-501" y="-68"/>
 		</transition>
 		<transition>
-			<source ref="id46"/>
-			<target ref="id45"/>
+			<source ref="id45"/>
+			<target ref="id44"/>
 			<label kind="synchronisation" x="-442" y="-161">phy_changing_lane[id][id]?</label>
 			<label kind="assignment" x="-442" y="-144">timer=0</label>
 		</transition>
@@ -739,122 +739,122 @@ void update_back_vehicle(ID i){
     if(i==3){back_vehicle=4;}
     if(i==4){back_vehicle=2;}
 }</declaration>
-		<location id="id47" x="-901" y="161">
+		<location id="id46" x="-901" y="161">
 		</location>
-		<location id="id48" x="-1139" y="-246">
+		<location id="id47" x="-1139" y="-246">
 			<label kind="invariant" x="-1488" y="-263">timer&lt;= SET_SPACE_TIME + SET_SPACE_BOUND</label>
 		</location>
-		<location id="id49" x="-1140" y="-178">
+		<location id="id48" x="-1140" y="-178">
 			<name x="-1130" y="-170">failed_to_join</name>
 			<committed/>
 		</location>
-		<location id="id50" x="-1351" y="161">
+		<location id="id49" x="-1351" y="161">
 			<name x="-1462" y="161">failed_to_leave</name>
 			<committed/>
 		</location>
-		<location id="id51" x="-977" y="238">
+		<location id="id50" x="-977" y="238">
 			<committed/>
 		</location>
-		<location id="id52" x="-1283" y="238">
+		<location id="id51" x="-1283" y="238">
 		</location>
-		<location id="id53" x="-1844" y="85">
+		<location id="id52" x="-1844" y="85">
 			<committed/>
 		</location>
-		<location id="id54" x="-1615" y="85">
+		<location id="id53" x="-1615" y="85">
 		</location>
-		<location id="id55" x="-1827" y="0">
+		<location id="id54" x="-1827" y="0">
 			<committed/>
 		</location>
-		<location id="id56" x="-1436" y="17">
+		<location id="id55" x="-1436" y="17">
 			<committed/>
 		</location>
-		<location id="id57" x="-1717" y="0">
+		<location id="id56" x="-1717" y="0">
 			<label kind="invariant" x="-1776" y="17">timer&lt;= SET_SPACE_TIME + SET_SPACE_BOUND</label>
 		</location>
-		<location id="id58" x="-1547" y="238">
+		<location id="id57" x="-1547" y="238">
 			<committed/>
 		</location>
-		<location id="id59" x="-1139" y="17">
+		<location id="id58" x="-1139" y="17">
 			<label kind="invariant" x="-1122" y="8">timer&lt;= SET_SPACE_TIME + SET_SPACE_BOUND</label>
 		</location>
-		<location id="id60" x="-1844" y="238">
+		<location id="id59" x="-1844" y="238">
 			<name x="-1835" y="247">leave_agreement</name>
 		</location>
-		<location id="id61" x="-1445" y="85">
+		<location id="id60" x="-1445" y="85">
 			<committed/>
 		</location>
-		<location id="id62" x="-1309" y="85">
+		<location id="id61" x="-1309" y="85">
 			<label kind="invariant" x="-1419" y="102">timer&lt;= SET_SPACE_TIME + SET_SPACE_BOUND</label>
 		</location>
-		<location id="id63" x="-1717" y="-110">
+		<location id="id62" x="-1717" y="-110">
 			<name x="-1717" y="-102">join_ack</name>
 			<committed/>
 		</location>
-		<location id="id64" x="-1054" y="85">
+		<location id="id63" x="-1054" y="85">
 			<committed/>
 		</location>
-		<location id="id65" x="-1436" y="-110">
+		<location id="id64" x="-1436" y="-110">
 			<name x="-1428" y="-102">join_agreement</name>
 		</location>
-		<location id="id66" x="-1139" y="-110">
+		<location id="id65" x="-1139" y="-110">
 			<committed/>
 		</location>
-		<location id="id67" x="-816" y="-110">
+		<location id="id66" x="-816" y="-110">
 			<name x="-858" y="-110">idle</name>
 		</location>
-		<init ref="id67"/>
+		<init ref="id66"/>
 		<transition>
-			<source ref="id65"/>
-			<target ref="id66"/>
+			<source ref="id64"/>
+			<target ref="id65"/>
 			<label kind="synchronisation" x="-1419" y="-170">insuff_space[joining_vehicle.sender][0]?</label>
 			<nail x="-1419" y="-153"/>
 			<nail x="-1181" y="-153"/>
 		</transition>
 		<transition>
-			<source ref="id51"/>
-			<target ref="id67"/>
+			<source ref="id50"/>
+			<target ref="id66"/>
 			<label kind="guard" x="-850" y="238">fail_leaving</label>
 			<nail x="-943" y="255"/>
 			<nail x="-748" y="255"/>
 			<nail x="-748" y="110"/>
 		</transition>
 		<transition>
-			<source ref="id47"/>
-			<target ref="id58"/>
+			<source ref="id46"/>
+			<target ref="id57"/>
 			<label kind="guard" x="-1249" y="161">timer&gt;= SET_SPACE_TIME - SET_SPACE_BOUND</label>
 			<label kind="synchronisation" x="-1232" y="178">set_spacing_from[leaving_vehicle.sender][0]?</label>
 			<nail x="-901" y="195"/>
 			<nail x="-1547" y="195"/>
 		</transition>
 		<transition>
-			<source ref="id50"/>
-			<target ref="id47"/>
+			<source ref="id49"/>
+			<target ref="id46"/>
 			<label kind="synchronisation" x="-1343" y="127">set_spacing_c[0][leaving_vehicle.sender]!</label>
 			<label kind="assignment" x="-1326" y="144">timer=0, space=0</label>
 		</transition>
 		<transition>
-			<source ref="id48"/>
-			<target ref="id67"/>
+			<source ref="id47"/>
+			<target ref="id66"/>
 			<label kind="guard" x="-1190" y="-297">timer&gt;= SET_SPACE_TIME - SET_SPACE_BOUND</label>
 			<label kind="synchronisation" x="-1164" y="-280">set_spacing_from[joining_vehicle.front][0]?</label>
 			<nail x="-867" y="-246"/>
 		</transition>
 		<transition>
-			<source ref="id49"/>
-			<target ref="id48"/>
+			<source ref="id48"/>
+			<target ref="id47"/>
 			<label kind="guard" x="-1317" y="-229">joining_vehicle.front!=0</label>
 			<label kind="synchronisation" x="-1334" y="-212">set_spacing_c[0][joining_vehicle.front]!</label>
 			<label kind="assignment" x="-1215" y="-195">timer=0, space=0</label>
 		</transition>
 		<transition>
-			<source ref="id49"/>
-			<target ref="id67"/>
+			<source ref="id48"/>
+			<target ref="id66"/>
 			<label kind="guard" x="-1079" y="-195">joining_vehicle.front==0</label>
 			<nail x="-851" y="-178"/>
 		</transition>
 		<transition>
-			<source ref="id65"/>
-			<target ref="id49"/>
+			<source ref="id64"/>
+			<target ref="id48"/>
 			<label kind="guard" x="-1691" y="-229">timer &gt;= SET_SPACE_TIME+ SET_SPACE_BOUND + 
 CHANGE_LANE_TIME+ CHANGE_LANE_BOUND+
 CHANGE_LANE_TIME+CHANGE_LANE_BOUND+ 
@@ -863,8 +863,8 @@ LEADER_WAITING</label>
 			<nail x="-1436" y="-178"/>
 		</transition>
 		<transition>
-			<source ref="id60"/>
-			<target ref="id50"/>
+			<source ref="id59"/>
+			<target ref="id49"/>
 			<label kind="guard" x="-1802" y="161">timer &gt;= SET_SPACE_TIME+ SET_SPACE_BOUND+ 
 CHANGE_LANE_TIME+ CHANGE_LANE_BOUND + 
 LEADER_WAITING</label>
@@ -872,120 +872,120 @@ LEADER_WAITING</label>
 			<nail x="-1802" y="161"/>
 		</transition>
 		<transition>
-			<source ref="id51"/>
-			<target ref="id67"/>
+			<source ref="id50"/>
+			<target ref="id66"/>
 			<label kind="synchronisation" x="-1045" y="255">no_platoon_m_c[0][leaving_vehicle.sender]!</label>
 			<nail x="-756" y="238"/>
 			<nail x="-756" y="110"/>
 		</transition>
 		<transition>
-			<source ref="id52"/>
-			<target ref="id51"/>
+			<source ref="id51"/>
+			<target ref="id50"/>
 			<label kind="synchronisation" x="-1266" y="238">switch_steering_done[back_vehicle][0]?</label>
 		</transition>
 		<transition>
-			<source ref="id58"/>
-			<target ref="id52"/>
+			<source ref="id57"/>
+			<target ref="id51"/>
 			<label kind="guard" x="-1479" y="221">back_vehicle!= 0</label>
 			<label kind="synchronisation" x="-1521" y="238">switch_steering[0][back_vehicle]!</label>
 		</transition>
 		<transition>
-			<source ref="id53"/>
-			<target ref="id60"/>
+			<source ref="id52"/>
+			<target ref="id59"/>
 			<label kind="synchronisation" x="-1844" y="102">leave_agr_c[0][leaving_vehicle.sender]!</label>
 		</transition>
 		<transition>
-			<source ref="id54"/>
-			<target ref="id53"/>
+			<source ref="id53"/>
+			<target ref="id52"/>
 			<label kind="synchronisation" x="-1853" y="59">switch_steering_done[back_vehicle][0]?</label>
 		</transition>
 		<transition>
-			<source ref="id61"/>
-			<target ref="id54"/>
+			<source ref="id60"/>
+			<target ref="id53"/>
 			<label kind="guard" x="-1581" y="68">back_vehicle!=0</label>
 			<label kind="synchronisation" x="-1657" y="34">switch_steering[0][back_vehicle]!</label>
 		</transition>
 		<transition>
-			<source ref="id55"/>
-			<target ref="id67"/>
+			<source ref="id54"/>
+			<target ref="id66"/>
 			<label kind="synchronisation" x="-1827" y="-340">platoon_m_c[0][joining_vehicle.sender]!</label>
 			<label kind="assignment" x="-1819" y="-323">joining_vehicle= empty_req()</label>
 			<nail x="-1827" y="-323"/>
 			<nail x="-850" y="-323"/>
 		</transition>
 		<transition>
-			<source ref="id57"/>
-			<target ref="id55"/>
+			<source ref="id56"/>
+			<target ref="id54"/>
 			<label kind="guard" x="-1819" y="-42">timer&gt;= SET_SPACE_TIME - SET_SPACE_BOUND</label>
 			<label kind="synchronisation" x="-1819" y="-25">set_spacing_from[joining_vehicle.front][0]?</label>
 		</transition>
 		<transition>
-			<source ref="id66"/>
-			<target ref="id65"/>
+			<source ref="id65"/>
+			<target ref="id64"/>
 			<label kind="guard" x="-1419" y="-144">joining_vehicle.front==0</label>
 			<label kind="synchronisation" x="-1418" y="-127">join_agr_c[0][joining_vehicle.sender]!</label>
 		</transition>
 		<transition>
-			<source ref="id56"/>
-			<target ref="id65"/>
+			<source ref="id55"/>
+			<target ref="id64"/>
 			<label kind="synchronisation" x="-1436" y="-59">join_agr_c[0][joining_vehicle.sender]!</label>
 		</transition>
 		<transition>
-			<source ref="id59"/>
-			<target ref="id56"/>
+			<source ref="id58"/>
+			<target ref="id55"/>
 			<label kind="guard" x="-1445" y="-25">timer&gt;= SET_SPACE_TIME - SET_SPACE_BOUND</label>
 			<label kind="synchronisation" x="-1428" y="-8">set_spacing_from[joining_vehicle.front][0]?</label>
 		</transition>
 		<transition>
-			<source ref="id63"/>
-			<target ref="id57"/>
+			<source ref="id62"/>
+			<target ref="id56"/>
 			<label kind="guard" x="-1717" y="-85">joining_vehicle.front!=0</label>
 			<label kind="synchronisation" x="-1717" y="-68">set_spacing_c[0][joining_vehicle.front]!</label>
 			<label kind="assignment" x="-1717" y="-55">timer=0, space=0</label>
 		</transition>
 		<transition>
-			<source ref="id58"/>
-			<target ref="id67"/>
+			<source ref="id57"/>
+			<target ref="id66"/>
 			<label kind="guard" x="-901" y="195">back_vehicle==0</label>
 			<label kind="synchronisation" x="-1062" y="212">no_platoon_m_c[0][leaving_vehicle.sender]!</label>
 			<nail x="-1453" y="212"/>
 			<nail x="-782" y="212"/>
 		</transition>
 		<transition>
-			<source ref="id60"/>
-			<target ref="id58"/>
+			<source ref="id59"/>
+			<target ref="id57"/>
 			<label kind="synchronisation" x="-1810" y="221">left_suc[leaving_vehicle.sender][0]?</label>
 		</transition>
 		<transition>
-			<source ref="id61"/>
-			<target ref="id60"/>
+			<source ref="id60"/>
+			<target ref="id59"/>
 			<label kind="guard" x="-1776" y="119">back_vehicle==0</label>
 			<label kind="synchronisation" x="-1776" y="136">leave_agr_c[0][leaving_vehicle.sender]!</label>
 			<nail x="-1445" y="136"/>
 			<nail x="-1827" y="136"/>
 		</transition>
 		<transition>
-			<source ref="id66"/>
-			<target ref="id59"/>
+			<source ref="id65"/>
+			<target ref="id58"/>
 			<label kind="guard" x="-1139" y="-68">joining_vehicle.front!= 0</label>
 			<label kind="synchronisation" x="-1139" y="-51">set_spacing_c[0][joining_vehicle.front]!</label>
 			<label kind="assignment" x="-1139" y="-34">timer=0, space=1</label>
 		</transition>
 		<transition>
-			<source ref="id62"/>
-			<target ref="id61"/>
+			<source ref="id61"/>
+			<target ref="id60"/>
 			<label kind="guard" x="-1428" y="34">timer&gt;= SET_SPACE_TIME - SET_SPACE_BOUND</label>
 			<label kind="synchronisation" x="-1470" y="51">set_spacing_from[leaving_vehicle.sender][0]?</label>
 		</transition>
 		<transition>
-			<source ref="id64"/>
-			<target ref="id62"/>
+			<source ref="id63"/>
+			<target ref="id61"/>
 			<label kind="synchronisation" x="-1292" y="68">set_spacing_c[0][leaving_vehicle.sender]!</label>
 			<label kind="assignment" x="-1215" y="85">timer=0, space=1</label>
 		</transition>
 		<transition>
-			<source ref="id63"/>
-			<target ref="id67"/>
+			<source ref="id62"/>
+			<target ref="id66"/>
 			<label kind="guard" x="-1530" y="-323">joining_vehicle.front==0</label>
 			<label kind="synchronisation" x="-1343" y="-323">platoon_m_c[0][joining_vehicle.sender]!</label>
 			<label kind="assignment" x="-1054" y="-323">joining_vehicle= empty_req()</label>
@@ -993,13 +993,13 @@ LEADER_WAITING</label>
 			<nail x="-858" y="-306"/>
 		</transition>
 		<transition>
-			<source ref="id65"/>
-			<target ref="id63"/>
+			<source ref="id64"/>
+			<target ref="id62"/>
 			<label kind="synchronisation" x="-1708" y="-136">joined_suc[joining_vehicle.sender][0]?</label>
 		</transition>
 		<transition>
-			<source ref="id67"/>
-			<target ref="id64"/>
+			<source ref="id66"/>
+			<target ref="id63"/>
 			<label kind="select" x="-943" y="59">i : ID</label>
 			<label kind="synchronisation" x="-969" y="68">leave_r[i][0]?</label>
 			<label kind="assignment" x="-1011" y="85">leaving_vehicle= reqglobal,
@@ -1008,12 +1008,28 @@ fail_leaving=false</label>
 			<nail x="-816" y="85"/>
 		</transition>
 		<transition>
-			<source ref="id67"/>
-			<target ref="id66"/>
+			<source ref="id66"/>
+			<target ref="id65"/>
 			<label kind="select" x="-1011" y="-144">i: ID</label>
 			<label kind="synchronisation" x="-1028" y="-127">join_r[i][0]?</label>
 			<label kind="assignment" x="-1088" y="-110">joining_vehicle= reqglobal,
 timer=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>road_traffic</name>
+		<location id="id67" x="-263" y="-8">
+		</location>
+		<init ref="id67"/>
+		<transition>
+			<source ref="id67"/>
+			<target ref="id67"/>
+			<label kind="select" x="-306" y="-170">i: ID</label>
+			<label kind="synchronisation" x="-348" y="-153">check_collision[i][0]?</label>
+			<label kind="assignment" x="-382" y="-136">(c_back[i]?(c_back[i] = false):
+(c_back[i] = true))</label>
+			<nail x="-374" y="-93"/>
+			<nail x="-161" y="-93"/>
 		</transition>
 	</template>
 	<template>
@@ -1050,13 +1066,12 @@ s2 = ch_lane(2);
 s3 = ch_lane(3);
 s4 = ch_lane(4);
 coll = potential_c();
+backColl = road_traffic();
 
 l = leader();
 
-z = zenoness();
-
 // List one or more processes to be composed into a system.
-system v2, s2, a2, v3, s3, a3, v4, s4, a4, l, coll;
+system v2, s2, a2, v3, s3, a3, v4, s4, a4, l, coll, backColl;
   
 
   </system>
@@ -1068,7 +1083,7 @@ system v2, s2, a2, v3, s3, a3, v4, s4, a4, l, coll;
 			</comment>
 		</query>
 		<query>
-			<formula>(c[2] ==1 &amp;&amp; !(pc)) --&gt; (s2.r ==1)
+			<formula>(c[2] &amp;&amp; !pc) --&gt; (s2.r)
 			</formula>
 			<comment>
 			</comment>
@@ -1092,7 +1107,7 @@ system v2, s2, a2, v3, s3, a3, v4, s4, a4, l, coll;
 			</comment>
 		</query>
 		<query>
-			<formula>A[] a2.join_completed imply (a2.process_time&gt;=50 &amp;&amp; a2.process_time&lt;90)
+			<formula>A[] a2.join_completed imply (a2.process_time&gt;=50 &amp;&amp; a2.process_time&lt;120)
 			</formula>
 			<comment>
 			</comment>
