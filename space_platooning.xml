@@ -358,7 +358,7 @@ SET_SPACE_BOUND+AGENT_WAITING</label>
 		<transition>
 			<source ref="id18"/>
 			<target ref="id8"/>
-			<label kind="guard" x="-306" y="-620">process_time&gt; SET_SPACE_TIME+ 
+			<label kind="guard" x="-306" y="-620">process_time&gt;= SET_SPACE_TIME+ 
 SET_SPACE_BOUND+ SET_SPACE_TIME+ 
 SET_SPACE_BOUND+
 CHANGE_LANE_TIME+CHANGE_LANE_BOUND</label>
@@ -498,6 +498,7 @@ clock change_lane_clk;
 			<label kind="invariant" x="-527" y="-306">change_lane_clk &lt;= CH_L_W_DL</label>
 		</location>
 		<location id="id32" x="93" y="-34">
+			<label kind="invariant" x="102" y="-17">change_lane_clk &lt;= CH_L_W_DL</label>
 		</location>
 		<location id="id33" x="-263" y="136">
 			<label kind="invariant" x="-382" y="161">change_lane_clk &lt;= CH_L_W_DL</label>
@@ -511,6 +512,13 @@ clock change_lane_clk;
 		<location id="id36" x="-340" y="-34">
 		</location>
 		<init ref="id36"/>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id36"/>
+			<label kind="guard" x="-170" y="-8">change_lane_clk &gt;= CH_L_W_DL</label>
+			<nail x="51" y="8"/>
+			<nail x="-323" y="8"/>
+		</transition>
 		<transition>
 			<source ref="id33"/>
 			<target ref="id36"/>
@@ -593,7 +601,7 @@ change_lane_clk &lt; CH_L_W_DL</label>
 			<target ref="id32"/>
 			<label kind="guard" x="102" y="-170">!pc &amp;&amp; c[id]</label>
 			<label kind="synchronisation" x="102" y="-119">phy_changing_lane[id][id]!</label>
-			<label kind="assignment" x="102" y="-144">c[id] = 0, r = 1</label>
+			<label kind="assignment" x="102" y="-144">c[id] = 0, r = 1, change_lane_clk = 0</label>
 			<nail x="93" y="-187"/>
 		</transition>
 		<transition>
@@ -662,6 +670,13 @@ clock timer;
 		</location>
 		<init ref="id45"/>
 		<transition>
+			<source ref="id44"/>
+			<target ref="id45"/>
+			<label kind="guard" x="-510" y="-42">timer &gt;= CHANGE_LANE_TIME + CHANGE_LANE_BOUND</label>
+			<nail x="-170" y="-25"/>
+			<nail x="-518" y="-25"/>
+		</transition>
+		<transition>
 			<source ref="id45"/>
 			<target ref="id41"/>
 			<label kind="synchronisation" x="-467" y="-433">steering_auto[id][id]?</label>
@@ -718,7 +733,8 @@ clock timer;
 		<transition>
 			<source ref="id44"/>
 			<target ref="id45"/>
-			<label kind="guard" x="-493" y="-93">timer&gt;= CHANGE_LANE_TIME - CHANGE_LANE_BOUND</label>
+			<label kind="guard" x="-493" y="-110">timer&gt;= CHANGE_LANE_TIME - CHANGE_LANE_BOUND &amp;&amp;
+timer &lt; CHANGE_LANE_TIME + CHANGE_LANE_BOUND</label>
 			<label kind="synchronisation" x="-450" y="-68">phy_changed_lane[id][id]!</label>
 			<nail x="-195" y="-68"/>
 			<nail x="-501" y="-68"/>
